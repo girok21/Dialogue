@@ -5,7 +5,6 @@ import PostPage from "./pages/PostPage"
 import Header from "./components/header"
 import NavBar from "./components/NavBar"
 import HomePage from "./pages/HomePage"
-
 function App() {
 
   return (

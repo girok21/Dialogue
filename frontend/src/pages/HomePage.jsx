@@ -1,8 +1,19 @@
 import { Avatar, Button, Divider, Flex, Select, Text, Textarea } from "@chakra-ui/react"
 import PostOptions from "../components/PostOptions"
 import UserFeed from "../components/UserFeed"
-
+import { useEffect, useState } from "react";
+import axios from 'axios'
 const HomePage = () => {
+    const [users, setUsers] = useState([]);
+
+    useEffect(()=>{
+        const fetchUsers = async () => {
+            const { data } = await axios.get('/api/users');
+            setUsers(data);
+        }
+        fetchUsers();
+    }, [])
+    console.log(users)
   return (
     <>
         <Flex w={"full"}
