@@ -1,11 +1,49 @@
 .icon-container{
     border-radius: 50%;
-    padding: 8px;
+    /* padding: 8px; */
     width: 40px;
     height: 40px;
+    display: flex;
+    /* padding: auto auto; */
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     transition: background-color 0.3s ease-in-out;
 }
 
 .icon-container:hover{
-    background-color: #1e1e1e;
+    background-color: #6f6e6e; 
 }
+
+.MuiAvatar{
+    z-index: -1;
+}
+
+#login-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#signup-form{
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.icon-overlay {
+    position: absolute;
+    top: 50%; /* Adjust this value to vertically center the icon as needed */
+    left: 50%; /* Adjust this value to horizontally center the icon as needed */
+    transform: translate(-50%, -50%); /* Center the icon properly */
+    background-color: rgba(0, 0, 0, 0.5); /* Adjust the background color and opacity as needed */
+    padding: 10px; /* Adjust the padding as needed */
+    border-radius: 50%; /* Create a circular background for the icon; adjust if you want a different shape */
+    color: #fff; /* Icon color */
+    cursor: pointer; /* Add pointer cursor to indicate interactivity */
+  }
+  
+  .text-underline:hover {
+    text-decoration: underline; /* Show the underline on hover */
+  }

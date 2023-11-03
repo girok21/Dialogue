@@ -21,9 +21,14 @@ const postSchema = new mongoose.Schema({
         ref: 'User'
     }],
     comments: [{
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Reply'
-    }],
+        _id:{
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Reply'
+        }, 
+        userId:{
+            type: mongoose.Schema.Types.ObjectId, 
+            ref: 'User'
+        }}],
 },{timestamps: true});
 
 const PostModel = mongoose.model('Post', postSchema);

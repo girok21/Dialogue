@@ -3,6 +3,7 @@ import PostModel from '../Models/PostModel.js';
 import UserModel from '../Models/UserModel.js';
 import ReplyModel from '../Models/ReplyModel.js';
 import NotificationModel from '../Models/NotificationModel.js';
+import { v2 as cloudinary } from "cloudinary"
 
 const objectId = mongoose.Types.ObjectId;
 
@@ -11,12 +12,20 @@ const objectId = mongoose.Types.ObjectId;
 //@access Public
 
 export const createPost = async(req, res) =>{
-    const userId = req.params.id;
-    const currentUser = await UserModel.findById(userId);
-    const newPost = new PostModel({...req.body, user: userId});
+    const currentUser = req.user;
+    let { image } = req.body;
+    const text = req.body.text;
+    let PostBody = {text};
+    if(image){
+        const uploadedResponse = await cloudinary.uploader.upload(image);
+        image = uploadedResponse.secure_url;
+        PostBody = { ...PostBody, images: [image] }
+    }
+    const userId = currentUser._id;
+    const newPost = new PostModel({...PostBody, user: userId});
     try {
         const createdPost = await newPost.save();
-        const updatedUser = await UserModel.findByIdAndUpdate(userId, {posts: [...currentUser.posts, {_id: createdPost._id, isShare: false, createdAt: Date.now()}]}, {new: true});
+        const updatedUser = await UserModel.findByIdAndUpdate(userId, {posts: [...currentUser.posts, {postId: createdPost._id, isShare: false, createdAt: Date.now()}]}, {new: true});
         res.status(200).json({message:`Post created`, createdPost, updatedUser} )
     } catch (error) {
         return res.status(500).send(`Error creating post: ${error.message}`);
@@ -51,22 +60,24 @@ export const editPost = async(req, res) => {
 //@access Public
 
 export const deletePost = async(req, res) => {
-    const userId = new objectId(req.params.id);
-    const currentUser = await UserModel.findById(userId);
-    const { postId } = req.body;
+    const currentUser = req.user;
+    const { id:postId } = req.params;
     try {
+        const userId = currentUser._id;
         const currentPost = await PostModel.findById(postId);
+        if(!currentPost) throw new Error('Post not found');
         if(!currentPost.user.equals(userId)){
-            return res.status(500).send('Action Prohibited!')
+            throw new Error("Action prohbhited!");
         }
         const deletedPost = await PostModel.findByIdAndDelete(postId);
 
-        let updatedPostList = currentUser.posts
+        let updatedPostList = currentUser.posts;
         updatedPostList.splice(currentUser.posts.indexOf(postId), 1);
         const updatedUser = await UserModel.findByIdAndUpdate(userId, {posts: updatedPostList}, {new: true})
-        return res.status(200).send({message: 'Post deleted successfully', deletedPost, updatedUser});
+        return res.status(200).send({message: 'Post deleted!'});
     } catch (error) {
-        return res.status(500).send(`Error: ${error.message}`)
+        console.log(error.message)
+        return res.status(500).send({message: error.message});
     }
 }
 
@@ -75,11 +86,14 @@ export const deletePost = async(req, res) => {
 //@access Public
 
 export const addPostComment = async (req, res) => {
-    const userId = new objectId(req.params.id);
-    const postId = new objectId(req.body.postId);
+    const postId = new objectId(req.params.postId);
     try {
+        if(!postId || postId === ""){
+            throw new Error("Invalid post id");
+        }
         //User who's commenting 
-        const currentUser = await UserModel.findById(userId);
+        const currentUser = req.user;
+        const userId = currentUser._id;
         //Post getting commented
         const currentPost = await PostModel.findById(postId);
         //Original user who posted
@@ -108,9 +122,9 @@ export const addPostComment = async (req, res) => {
         const savedNotification = await newNotification.save();
         //notification list of the post's original user
         const notifications = [...currentPostUser.notifications, savedNotification._id];      
-        const updatedCurrentUser = await UserModel.findByIdAndUpdate(userId, {replies: [...currentRepliesList, savedPostComment._id]}, {new: true});
+        const updatedCurrentUser = await UserModel.findByIdAndUpdate(userId, {replies: [...currentRepliesList, {reply: savedPostComment._id, post: postId}]}, {new: true});
         const updatedOriginalPoster = await UserModel.findByIdAndUpdate(currentPostUser._id, {notifications}, {new: true})
-        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {comments: [...currentPostRepliesList, savedPostComment._id]}, {new: true});
+        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {comments: [...currentPostRepliesList, {_id: savedPostComment._id, userId: currentUser._id}]}, {new: true});
         return res.status(200).json({message: 'Comment saved successfully', savedPostComment, updatedCurrentUser, updatedCurrentPost})
     } catch (error) {
         res.status(500).send(`Error: ${error.message}`);
@@ -156,11 +170,13 @@ export const addReplyComment = async (req, res) => {
 //@access Public
 
 export const likePost = async (req, res) => {
-    const userId = new objectId(req.params.id);
-    const postId = new objectId(req.body.postId);
-    console.log(userId, postId);
+    if(!req.params.postId){
+        return res.status(404).send({ message: 'Post Id not found' });
+    }
+    const {postId} = req.params;
     try {
-        const currentUser = await UserModel.findById(userId);
+        const currentUser = req.user;
+        const userId = currentUser._id;
         const currentPost = await PostModel.findById(postId);
         if(!currentUser || !currentPost){
             return res.status(404).send('Post or User not found');
@@ -170,27 +186,25 @@ export const likePost = async (req, res) => {
         //if user already present in likes list then we perform "Dislike" operation or we perform "Like" operation
         if(postLikeData.indexOf(userId) !== -1){//user already liked -> perform "Dislike"
             postLikeData.splice(postLikeData.indexOf(userId), 1);
-            message = 'Post Disliked successfully';
+            message = 'disliked';
         }
         else{ //user has not liked -> perform "Like"
             postLikeData = [...postLikeData, userId];
-            message = 'Post Liked successfully';
+            message = 'liked';
         }
         const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {likes: postLikeData}, {new: true});
-        return res.status(200).json({message,updatedCurrentPost})
+        return res.status(200).json({message, updatedCurrentPost})
     } catch (error) {
         return res.status(500).send(`Error: ${error.message}`);
     }   
 }
 
 //@desc Share Post
-//@route Put/api/post/like
+//@route Put/api/post/share
 //@access Public
 
 export const sharePost = async (req, res) => {
-    const userId = new objectId(req.params.id);
-    const postId = new objectId(req.body.postId);
-    console.log(userId, postId);
+    const postId = new objectId(req.params.postId);
     try {
         const currentUser = await UserModel.findById(userId);
         const currentPost = await PostModel.findById(postId);
@@ -200,17 +214,37 @@ export const sharePost = async (req, res) => {
         let postShareList = currentPost.shares;
         let message = '';
         //if user already present in share list then we perform "UnShare" operation or we perform "Share" operation
-        if(postLikeData.indexOf(userId) !== -1){//user already liked -> perform "UnShare"
-            postLikeData.splice(postLikeData.indexOf(userId), 1);
+        if(postShareList.indexOf(userId) !== -1){//user already shared -> perform "UnShare"
+            postShareList.splice(postShareList.indexOf(userId), 1);
             message = 'Post UnShared successfully';
         }
         else{ //user has not liked -> perform "Like"
-            postLikeData = [...postLikeData, userId];
+            postShareList = [...postShareList, userId];
             message = 'Post Shared successfully';
         }
-        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {likes: postLikeData}, {new: true});
+        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {shares: postShareList}, {new: true});
         return res.status(200).json({message,updatedCurrentPost})
     } catch (error) {
         return res.status(500).send(`Error: ${error.message}`);
     }   
+}
+
+//@desc Get Post Comment by commnet Id
+//@route GET/api/post/comment/:postId/:commentId
+//@access Public
+
+export const getPostComment = async(req, res) =>{
+    try {
+        const {commentId} = req.params;
+        if(!commentId || commentId===""){
+            throw new Error("Invalid reply id");
+        }
+        const commentObject = await ReplyModel.findById(commentId);
+        if(!commentObject){
+            throw new Error("Invalid reply id");
+        }
+        return res.status(200).send(commentObject);
+    } catch (error) {
+        return res.status(404).send({error: error.message});
+    }
 }

@@ -24,22 +24,38 @@ const userSchema = new mongoose.Schema({
     },
     isAdmin: {
         type: Boolean,
+        required: true,
         default: false
     },
-    profilePicture: String,
-    coverPicture: String,
-    bio: String,
-    followers: [String],
-    following: [String],
-    posts: [{_id: {
+    profilePicture: {
+        type: String,
+    },
+    coverPicture: {
+        type: String,
+    },
+    bio: {
+        type: String,
+        required: true,
+        default: '',
+    },
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    }],
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    }],
+    posts: [{postId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Post",
-    }, isShare : Boolean, createdAt: Date}],
+    }, isShare : {type: Boolean, default: false}, createdAt: Date}],
     replies: [{reply: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "Reply",
     }, post: {
         type: mongoose.Schema.Types.ObjectId,
+        required: true,
         ref: "Post",
     }}],
     notifications: [{

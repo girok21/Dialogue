@@ -9,7 +9,7 @@ const Comment = ({comment, createdAt, likes, userName, userAvatar}) => {
   return (
     <>
         <Flex gap={4} py={2} my={2} w={"full"}>
-            <Avatar src={userAvatar} size={"sm"}/>
+            <Avatar src={userAvatar} size={"sm"} zIndex={-2}/>
             <Flex gap={1} w={"full"} flexDirection={"column"}>
                 <Flex justifyContent={"space-between"}>
                     <Text fontSize={"sm"} fontWeight={"bold"}>
