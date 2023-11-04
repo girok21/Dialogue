@@ -45,6 +45,14 @@ export const postApiSlice = apiSlice.injectEndpoints({
                 body: {text}
             }),
             keepUnusedDataFor: 5,
+        }),
+        repostPost: builder.mutation({
+            query: ({postId, action})=>({
+                url: `${POST_URL}/share/${postId}`,
+                method: 'PUT',
+                body: {action}
+            }),
+            keepUnusedDataFor:5,
         })
     })
 })
@@ -55,5 +63,6 @@ export const {
     useGetPostsQuery,
     useDeletePostMutation,
     useGetPostCommentQuery,
-    usePostPostCommentMutation
+    usePostPostCommentMutation,
+    useRepostPostMutation,
 } = userApiSlice;

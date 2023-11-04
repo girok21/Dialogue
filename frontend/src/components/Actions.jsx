@@ -3,19 +3,22 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import useCustomToast from "../hooks/useCustomToast";
-import { useLikePostMutation, usePostPostCommentMutation } from "../slices/postApiSlice";
-
+import { useLikePostMutation, useRepostPostMutation, usePostPostCommentMutation } from "../slices/postApiSlice";
+import { useGetUserFeedQuery } from "../slices/userApiSlice";
 
 const Actions = ({post, authorName}) => {
 
   const [liked, setLiked] = useState(false);
-  const [isReplying, setIsReplying] = useState(false);
+  const [ repostPost ] = useRepostPostMutation();
   const [replyText, setReplyText] = useState("");
+  const [ isShared, setIsShared ] = useState(false);
   const [likesCount, setLikesCount] = useState(0);
   const {showToast} = useCustomToast();
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [ postPostComment ] = usePostPostCommentMutation();
+
+  const { refetch } = useGetUserFeedQuery();
 
   const [ likePost ] = useLikePostMutation();
 
@@ -27,6 +30,9 @@ const Actions = ({post, authorName}) => {
       const postLiked = post.likes.indexOf(userInfo._id) === -1? false : true;
       setLikesCount(postLiked? post.likes.length - 1 : post.likes.length);//we will negate 1 like, or else it will count current user's like twice
       setLiked(postLiked);
+      post.shares;
+      const postShared = post.shares.indexOf(userInfo._id) === -1? false : true;
+      setIsShared(postShared);
     }
   }, [userInfo, post])
   const handleLikeAndUnlike = async(e)=>{
@@ -45,6 +51,21 @@ const Actions = ({post, authorName}) => {
           showToast(error.message, 'error');
       }     
     }
+  }
+
+  const handleRpostClick = async(e) => {
+    e.preventDefault();
+    try {
+      const action = isShared? 'remove' : 'repost';
+      const res = await repostPost({postId: post._id, action});
+      if(res.error) throw new Error("Internal Server Error")
+      showToast(res.data.message, 'success');      
+    } catch (error) {
+      showToast(error.message, 'error');
+      return;
+    }
+    setIsShared(!isShared);
+    refetch();
   }
 
   const onReplyTextChange = (e) => {
@@ -115,8 +136,8 @@ const Actions = ({post, authorName}) => {
               </ModalContent>
             </Modal>
           </Box>
-          <Box className="icon-container">
-            <RepostSVG />
+          <Box className="icon-container" onClick={handleRpostClick}>
+            <RepostSVG isShared={isShared}/>
           </Box>
           <Box className="icon-container">
             <ShareSVG />
@@ -156,8 +177,8 @@ const CommentSVG = () => {
   )
 }
 
-const RepostSVG = () => {
+const RepostSVG = ({isShared}) => {
   return (
-    <svg aria-label="Repost" color="currentColor" fill="rgb(243, 245, 247)" height="20" role="img" viewBox="0 0 24 24" width="20"><title>Repost</title><path d="M19.998 9.497a1 1 0 0 0-1 1v4.228a3.274 3.274 0 0 1-3.27 3.27h-5.313l1.791-1.787a1 1 0 0 0-1.412-1.416L7.29 18.287a1.004 1.004 0 0 0-.294.707v.001c0 .023.012.042.013.065a.923.923 0 0 0 .281.643l3.502 3.504a1 1 0 0 0 1.414-1.414l-1.797-1.798h5.318a5.276 5.276 0 0 0 5.27-5.27v-4.228a1 1 0 0 0-1-1Zm-6.41-3.496-1.795 1.795a1 1 0 1 0 1.414 1.414l3.5-3.5a1.003 1.003 0 0 0 0-1.417l-3.5-3.5a1 1 0 0 0-1.414 1.414l1.794 1.794H8.27A5.277 5.277 0 0 0 3 9.271V13.5a1 1 0 0 0 2 0V9.271a3.275 3.275 0 0 1 3.271-3.27Z" fill="currentColor" stroke="currentColor" strokeLinejoin="round" strokeWidth="0.2"></path></svg>
+    <svg aria-label="Repost" color={isShared? "rgb(74, 207, 129)" :"rgb(243, 245, 247)"} fill={isShared? "rgb(75, 219, 106)" :"rgb(243, 245, 247)"} height="20" role="img" viewBox="0 0 24 24" width="20"><title>Repost</title><path d="M19.998 9.497a1 1 0 0 0-1 1v4.228a3.274 3.274 0 0 1-3.27 3.27h-5.313l1.791-1.787a1 1 0 0 0-1.412-1.416L7.29 18.287a1.004 1.004 0 0 0-.294.707v.001c0 .023.012.042.013.065a.923.923 0 0 0 .281.643l3.502 3.504a1 1 0 0 0 1.414-1.414l-1.797-1.798h5.318a5.276 5.276 0 0 0 5.27-5.27v-4.228a1 1 0 0 0-1-1Zm-6.41-3.496-1.795 1.795a1 1 0 1 0 1.414 1.414l3.5-3.5a1.003 1.003 0 0 0 0-1.417l-3.5-3.5a1 1 0 0 0-1.414 1.414l1.794 1.794H8.27A5.277 5.277 0 0 0 3 9.271V13.5a1 1 0 0 0 2 0V9.271a3.275 3.275 0 0 1 3.271-3.27Z" fill="currentColor" stroke="currentColor" strokeLinejoin="round" strokeWidth="0.2"></path></svg>
   )
 }

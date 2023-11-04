@@ -3,7 +3,7 @@ import { useToast } from "@chakra-ui/react";
 
 
 const usePreviewImage = () => {
-    const [imgUrl, setImgUrl] = useState(null);
+    const [imgUrl, setImgUrl] = useState("");
     const toast = useToast();
     const handleImageChange = (e) =>{
         const file = e.target.files[0];

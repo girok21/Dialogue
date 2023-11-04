@@ -11,7 +11,9 @@ import { PiGifFill } from "react-icons/pi";
 import { RiEmojiStickerFill } from "react-icons/ri";
 import { MdScheduleSend } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from '../slices/authSlice.js'
+import { logout } from '../slices/authSlice.js';
+import useCustomToast from "../hooks/useCustomToast.js";
+
 const HomePage = () => {
 
     // const [userInfo] = useSelector((auth)=>auth.state)
@@ -19,21 +21,25 @@ const HomePage = () => {
     const [postText, setPostText] = useState("");
     const [createPost] = useCreatePostMutation();
     const { data, isLoading, error, refetch } = useGetUserFeedQuery();
-    const imageRef = useRef(null)
+    const imageRef = useRef(null);
+    const { showToast } = useCustomToast();
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
 
     //want to refetch if someone from my network posts a new dialogue
-    useEffect(()=>{
-        refetch();
-    }, [])
+    // useEffect(()=>{
+    //     refetch();
+    // }, [])
     const toast = useToast();
     const ref = useRef(null);
 
     const submitHandler = async(e)=>{
         e.preventDefault();
+        if(postText === "" && imgUrl === ""){
+            return showToast("Your Dialogue's Empty!")
+        }
         try {
             // await createPost({
             //     text: postText,
@@ -160,7 +166,7 @@ const HomePage = () => {
     <Divider />
     {isLoading && !data? (
         <h2>Loading...</h2>
-      ):error ? ( error.data.includes("token")? 
+      ):error ? ( error?.data.includes("token")? 
                     (
                         dispatch(logout())//if the error has to do anything with the token, just logout and refresh the token
                     ) : 

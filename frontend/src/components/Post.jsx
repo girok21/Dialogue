@@ -103,7 +103,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
             <Flex pt={5} flexDirection={'row'} ml={{base:'5',md:'10'}} alignItems={'center'} color={'#62676b'}>
                 {repostSvg()}
                 <Text className="text-underline" width={'fit-content'} fontWeight={'semibold'} fontSize={{base:'xs', md:'sm'}} >
-                    {author_name} reposted
+                    {userInfo.username!==author_username?author_name : 'You'} reposted
                 </Text>
             </Flex>
         </Link>}
@@ -162,7 +162,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
                     </Flex>
                     <Flex flex={1} flexDirection={"column"} gap={0}>
                         <Flex justifyContent={"space-between"}  w={"full"}>
-                            <Flex w={"full"} alignItems={"center"}>
+                            <Flex w={"full"} alignItems={"center"} onClick={(e)=>{e.preventDefault(); navigate(`/user/${user?.username}`)}}>
                                 <Text className="text-underline" fontSize={{sm:"sm", md:'md'}} fontWeight={"bold"}>{user?.firstName+' '+user?.lastName}</Text>
                                 <Image src="/verified.png" w={4} h={4} ml={1} />
                             </Flex>

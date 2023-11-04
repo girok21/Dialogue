@@ -200,30 +200,57 @@ export const likePost = async (req, res) => {
 }
 
 //@desc Share Post
-//@route Put/api/post/share
-//@access Public
+//@route Put/api/post/share/:postId
+//@access Private
 
 export const sharePost = async (req, res) => {
     const postId = new objectId(req.params.postId);
+    const {action} = req.body;
     try {
-        const currentUser = await UserModel.findById(userId);
+        const currentUser = req.user;
         const currentPost = await PostModel.findById(postId);
         if(!currentUser || !currentPost){
-            return res.status(404).send('Post or User not found');
+            throw new Error('User/Post not found');
         }
-        let postShareList = currentPost.shares;
+        let postShareList = currentUser.posts;
+        let shares = currentPost.shares;
+        if(!postShareList){
+            postShareList = [];
+        }
+        if(!shares){
+            shares = [];
+        }
         let message = '';
-        //if user already present in share list then we perform "UnShare" operation or we perform "Share" operation
-        if(postShareList.indexOf(userId) !== -1){//user already shared -> perform "UnShare"
-            postShareList.splice(postShareList.indexOf(userId), 1);
-            message = 'Post UnShared successfully';
+        //if action is remove 
+        if(action === "remove"){
+            let postIndex = postShareList.findIndex(post => post.isShare && post.postId.toString() === postId.toString());//find the corroesponding ID across all "shared" post
+            //post need to be unshared
+            if(postIndex !== -1)
+                postShareList.splice(postIndex, 1);//Remove the original shared post from the array
+            postIndex = shares.findIndex(user => user.toString() === currentUser._id.toString());
+            if(postIndex !== -1)
+                shares.splice(postIndex, 1);
+            message = 'Removed!';
         }
-        else{ //user has not liked -> perform "Like"
-            postShareList = [...postShareList, userId];
-            message = 'Post Shared successfully';
+        else if(action === "repost"){ //action equals repost
+            let postIndex = postShareList.findIndex(post => post.isShare && post.postId.toString() === postId.toString());//find the corroesponding ID across all "shared" post
+            if(postIndex === -1)
+                postShareList.push({
+                    postId: postId,
+                    isShare: true,
+                    createdAt: new Date()
+                })
+            postIndex = shares.findIndex(user => user.toString() === currentUser._id.toString());//find the corroesponding ID across all "shared" post
+            if(postIndex === -1)
+                shares = [...shares, currentUser._id]
+            message = 'Reposted!';
+
+        }else{
+            throw new Error('Invalid action!!!')
         }
-        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {shares: postShareList}, {new: true});
-        return res.status(200).json({message,updatedCurrentPost})
+        const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {shares}, {new: true});
+        const updatedUser = await UserModel.findByIdAndUpdate(currentUser._id, {posts: postShareList}, {new: true});
+        return res.status(200).json({message,updatedCurrentPost, updatedUser})
     } catch (error) {
         return res.status(500).send(`Error: ${error.message}`);
     }   
