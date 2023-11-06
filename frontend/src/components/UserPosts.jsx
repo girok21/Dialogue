@@ -22,7 +22,7 @@ const UserFeed = ({posts}) => {
   }
   return (
     <>
-      {posts.map((post) => <Post key={post._id} post={post}/>)}
+      {posts.map((postObject) => <Post key={postObject._id} author_username={postObject.username} author_name={postObject.author_name} isShare={postObject.isShare} post={postObject.post}/>)}
     </>
 )}
 

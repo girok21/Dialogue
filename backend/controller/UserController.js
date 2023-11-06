@@ -37,16 +37,34 @@ export const getUserByUsername = async (req, res) => {
         if(userExists){
         let sendingUser = userExists;
         let posts, replies = [];
+        let feedPosts = [];
         if(userExists.posts){
-            const postsIdList = userExists.posts.map((post)=> post._id);
-            posts = await PostModel.find({_id : {$in : postsIdList}}).sort({createdAt : -1});
-            sendingUser = {...sendingUser, posts: posts}
+            // const postsIdList = userExists.posts.map((post)=> post.postId);
+            // posts = await PostModel.find({_id : {$in : postsIdList}}).sort({createdAt : -1});
+            for (const post of userExists.posts) {
+                const postObject = await PostModel.findById(post.postId);
+                const author_fullName = userExists.firstName + ' ' + userExists.lastName;
+                const isShare = post.isShare;
+                const author_username = userExists.username;
+                const createdAt = post.createdAt;
+        
+                // Create the object with the desired fields and push it to the feedPosts array
+                feedPosts.push({
+                  _id: post._id,
+                  post: postObject,
+                  author_name: author_fullName,
+                  username: author_username,
+                  createdAt,
+                  isShare
+                });
+              }
+            // sendingUser = {...sendingUser, posts: feedPosts}
         }
         if(userExists.replies){
             const repliesIdList = userExists.replies.map((post)=> post._id);
             replies = await PostModel.find({_id : {$in : repliesIdList}}).sort({createdAt : -1})
         }
-            res.status(200).json({user: userExists, posts, replies});
+        res.status(200).json({user: userExists, posts: feedPosts, replies});
         }else{
             throw new Error({message: 'User Not Found'});
         }
@@ -266,7 +284,7 @@ export const getMyFeed = async(req, res) =>{
 }
 
 //@desc Get user relation with the given userId
-//@route GET/api/user/:id/relation
+//@route GET/api/user/relation/:id
 //@access Private
 
 export const getUserRelation = (req, res) => {
@@ -279,4 +297,98 @@ export const getUserRelation = (req, res) => {
     const isFollowing = user.following.indexOf(userId) !== -1? true : false;
     const isFollower = user.followers.indexOf(userId) !== -1? true : false;
     return res.status(200).json({isFollowing, isFollower, self});
+}
+
+
+//@desc Get User Notifications
+//@route GET/api/user/notifications
+//@access Private
+
+export const getUserNotifications = async (req, res) => {
+    const user = req.user;
+    // try {
+    //     const uniqueNotifications = await NotificationModel.aggregate([
+    //         {
+    //             $match: {
+    //                 user: user._id,
+    //             },
+    //         },
+    //         {
+    //             $sort: { createdAt: -1 }, // Sort notifications by createdAt in descending order
+    //         },
+    //         {
+    //             $group: {
+    //                 _id: {
+    //                     type: "$type",
+    //                     post: "$post",
+    //                     relatedUser: "$relatedUser",
+    //                     relatedComment: "$relatedComment",
+    //                 },
+    //                 latestNotification: { $first: "$$ROOT" },
+    //             },
+    //         },
+    //         {
+    //             $replaceRoot: { newRoot: "$latestNotification" },
+    //         },
+    //     ]);
+
+    //     res.status(200).json({ notifications: uniqueNotifications });
+    // } catch (error) {
+    //     res.status(500).json({ error });
+    // }
+    try {
+        const uniqueNotifications = await NotificationModel.aggregate([
+            {
+                $match: {
+                    user: user._id, // Match notifications for the specific user
+                },
+            },
+            {
+                $sort: { createdAt: -1 }, // Sort notifications by createdAt in descending order
+            },
+            {
+                $group: {
+                    _id: {
+                        type: "$type",
+                        post: "$post",
+                        relatedUser: "$relatedUser",
+                        relatedComment: "$relatedComment",
+                    },
+                    latestNotification: { $first: "$$ROOT" }, // Select the first (latest) notification within each group
+                },
+            },
+            {
+                $replaceRoot: { newRoot: "$latestNotification" }, // Replace the root document with the latest notification
+            },
+            {
+                $lookup: {
+                    from: "users", // Join with the UserModel (collection name)
+                    localField: "relatedUser",
+                    foreignField: "_id",
+                    as: "relatedUserData",
+                },
+            },
+            {
+                $addFields: {
+                    relatedUser: { $arrayElemAt: ["$relatedUserData", 0] }, // Extract related user data
+                },
+            },
+            {
+                $project: { //Shape the data in a format expected by the client side
+                    _id: 1,
+                    type: 1,
+                    user: 1,
+                    createdAt: 1,
+                    "relatedUser.profilePicture": 1,
+                    "relatedUser.username": 1,
+                    "relatedUser.firstName": 1,
+                    "relatedUser.lastName": 1,
+                },
+            },
+        ]).sort({ createdAt: -1 });
+        res.status(200).json({ notifications: uniqueNotifications });
+    } catch (error) {
+        console.log('here')
+        res.status(500).json({ error });
+    }
 }

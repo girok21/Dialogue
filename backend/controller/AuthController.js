@@ -34,7 +34,6 @@ export const registerUser = async( req, res )=>{
             sameSite: 'strict',
             maxAge: 24 * 60 * 60 * 1000
         });
-        delete newUser.password;
         return res.json({
             email: newUser.email,
             username: newUser.username,
@@ -57,12 +56,10 @@ export const registerUser = async( req, res )=>{
 
 export const loginUser = async(req, res) => {
     const { userid, password } = req.body;
-    console.log(userid, password)
     try {
         const user = await UserModel.findOne({$or: [{username: userid}, {email: userid}]});
         if(user){
             const validity = await bcrypt.compare(password, user.password);
-            console.log(userid, password)
             if(validity){
                 const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, {
                     expiresIn: '1d'

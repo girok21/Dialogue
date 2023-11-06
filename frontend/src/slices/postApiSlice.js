@@ -53,6 +53,12 @@ export const postApiSlice = apiSlice.injectEndpoints({
                 body: {action}
             }),
             keepUnusedDataFor:5,
+        }),
+        getPostById: builder.query({
+            query: (postId) => ({
+                url: `${POST_URL}/by-id/${postId}`
+            }),
+            keepUnusedDataFor:5,
         })
     })
 })
@@ -65,4 +71,5 @@ export const {
     useGetPostCommentQuery,
     usePostPostCommentMutation,
     useRepostPostMutation,
+    useGetPostByIdQuery
 } = userApiSlice;

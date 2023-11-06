@@ -1,7 +1,6 @@
-import { Avatar, Button, CloseButton, Divider, Flex, Image, Input, Select, Text, Textarea, useToast } from "@chakra-ui/react"
-import PostOptions from "../components/PostOptions"
+import { Avatar, Box, Button, CloseButton, Divider, Flex, Image, Input, Popover, PopoverBody, PopoverContent, PopoverTrigger, Select, Text, Textarea, useColorMode, useToast } from "@chakra-ui/react"
 import UserFeed from "../components/UserFeed"
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { useCreatePostMutation } from "../slices/postApiSlice";
 import { useGetUserFeedQuery } from "../slices/userApiSlice";
 import { useNavigate } from "react-router-dom";
@@ -13,20 +12,29 @@ import { MdScheduleSend } from "react-icons/md";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from '../slices/authSlice.js';
 import useCustomToast from "../hooks/useCustomToast.js";
+import EmojiPickerIcon from "../components/EmojiPickerIcon.jsx";
 
 const HomePage = () => {
 
     // const [userInfo] = useSelector((auth)=>auth.state)
-    const { userInfo } = useSelector((state)=> state.auth) 
+    const { userInfo } = useSelector((state)=> state.auth);
     const [postText, setPostText] = useState("");
     const [createPost] = useCreatePostMutation();
     const { data, isLoading, error, refetch } = useGetUserFeedQuery();
     const imageRef = useRef(null);
     const { showToast } = useCustomToast();
 
+    console.log(error)
+
     const dispatch = useDispatch();
     const navigate = useNavigate();
     const { handleImageChange, imgUrl, setImgUrl } = usePreviewImg();
+
+    const handleEmojiSelect = (e)=>{
+        let text = postText;
+        text = text + e.native;
+        setPostText(text)
+    }
 
     //want to refetch if someone from my network posts a new dialogue
     // useEffect(()=>{
@@ -81,6 +89,11 @@ const HomePage = () => {
         }
     }
 
+    if(!userInfo){
+        return(
+            <div>Loading...</div>
+        )
+    }
   return (
     <>
         <Flex
@@ -89,9 +102,9 @@ const HomePage = () => {
         >
             <Flex>
                 <div 
-                        onClick={(e)=>{e.preventDefault(); navigate(`/user/${userInfo?.username}`)}}
-                        style={{cursor: "pointer"}}
-                        >
+                    onClick={(e)=>{e.preventDefault(); console.log('here'); navigate(`/user/${userInfo?.username}`)}}
+                    style={{cursor: "pointer"}}
+                >
                     <Avatar 
                         name={userInfo?.firstName + userInfo?.lastName}
                         src={userInfo?.profilePicture || '/default-profile.jpg'}
@@ -108,11 +121,13 @@ const HomePage = () => {
                     style={{width:'100%'}}
                 >
                 <Flex 
+                    id="post-data"
                     flexDirection={"column"}
                     gap={2}
                     w={"100%"}
                 >
                     <Textarea
+                        id="post-text"
                         ref = {ref}
                         w={'full'}
                         minH={15}
@@ -120,6 +135,7 @@ const HomePage = () => {
                         placeholder="Share your Dialogue!"
                         variant={"unstyled"}
                         onChange={(e)=>{setPostText(e.target.value)}}
+                        value={postText}
                     />
                     {imgUrl && 
                         <Flex mt={5} w={'40%'} position={'relative'}>
@@ -134,6 +150,7 @@ const HomePage = () => {
                         </Flex>
                     }
                     <Input 
+                        id="post-image"
                         type="file"
                         hidden
                         ref={imageRef}
@@ -144,10 +161,36 @@ const HomePage = () => {
                         justifyContent={"space-between"}
                         alignItems={"center"}
                     >
-                        <Flex gap={4} cursor={"pointer"}>
+                        <Flex gap={4} cursor={"pointer"} > 
                             <BiSolidImageAdd size={20} onClick = {()=> imageRef.current.click()}/>
                             <PiGifFill size={20}/>
-                            <RiEmojiStickerFill size={20}/>
+                            {/* <RiEmojiStickerFill size={20} onClick={()=>{
+                                setIsEmojiPickerActive(!isEmojiPickerActive)}}/>
+                            { isEmojiPickerActive && 
+                                <>
+                                <Flex
+                                    zIndex={2}
+                                    position={'absolute'}
+                                    width={`calc(100vw - 17px)`}
+                                    h={'100vh'}
+                                    top={0}
+                                    left={0}
+                                    overflow={'hidden'}
+                                    cursor={'default'}
+                                    onClick={()=>{setIsEmojiPickerActive(!isEmojiPickerActive)}}
+                                ></Flex>
+                                <Flex position={'absolute'} zIndex={3}>
+                                    <Flex position={'absolute'} top={'6'}>
+                                        <Picker 
+                                            data={emojiData}
+                                            onEmojiSelect={handleEmojiSelect}
+                                            theme={colorMode}
+                                        />
+                                    </Flex>
+                                </Flex>
+                            </>
+                            } */}
+                            <EmojiPickerIcon  handleEmojiSelect={handleEmojiSelect}/>
                             <BiPoll size={20} />
                             <MdScheduleSend size={20}/>
                         </Flex>                        
@@ -160,13 +203,13 @@ const HomePage = () => {
                             Post
                         </Button>
                     </Flex>
-            </Flex>
-        </form>
+                </Flex>
+            </form>
     </Flex>
     <Divider />
     {isLoading && !data? (
         <h2>Loading...</h2>
-      ):error ? ( error?.data.includes("token")? 
+      ):error ? ( error?.status === 500? <div>Internal Server Error</div> : error?.data.includes("token")? 
                     (
                         dispatch(logout())//if the error has to do anything with the token, just logout and refresh the token
                     ) : 

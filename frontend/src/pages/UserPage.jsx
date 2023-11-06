@@ -52,7 +52,7 @@ const UserPage = () => {
       {isLoading && user? (<div>Loading...</div>) :error ? (<div>{ error }</div>) :
       (<>
         <UserHeader currentUser={user}/>
-        <Flex w={"full"} pt={5}>
+        <Flex w={"full"} p={5}>
               <Flex flex={1} style={feedSection==="dialogues"?activeStyleObject : passiveStyleObject} h={"10"} onClick={()=>onClickHandler("dialogues")}>
                   <Text fontWeight={"bold"}>Dialogues</Text>
               </Flex>

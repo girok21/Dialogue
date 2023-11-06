@@ -183,18 +183,31 @@ export const likePost = async (req, res) => {
         }
         let postLikeData = currentPost.likes;
         let message = '';
+        let isLikeAction = false;
         //if user already present in likes list then we perform "Dislike" operation or we perform "Like" operation
         if(postLikeData.indexOf(userId) !== -1){//user already liked -> perform "Dislike"
             postLikeData.splice(postLikeData.indexOf(userId), 1);
             message = 'disliked';
         }
         else{ //user has not liked -> perform "Like"
+            isLikeAction=true;
             postLikeData = [...postLikeData, userId];
             message = 'liked';
         }
         const updatedCurrentPost = await PostModel.findByIdAndUpdate(postId, {likes: postLikeData}, {new: true});
+        if(currentUser._id.toString() !== currentPost.user.toString() && isLikeAction){
+            const newNotification = new NotificationModel({
+                user: currentPost.user,
+                type: 'post_liked',
+                relatedUser: currentUser._id
+            });
+            const savedNotification = await newNotification.save();
+            //add notification to post author's notifications list
+            const postAuthor = await UserModel.findByIdAndUpdate(currentPost.user, {$push: {"notifications": savedNotification._id}})
+        }
         return res.status(200).json({message, updatedCurrentPost})
     } catch (error) {
+        console.error(error);
         return res.status(500).send(`Error: ${error.message}`);
     }   
 }
@@ -257,7 +270,7 @@ export const sharePost = async (req, res) => {
 }
 
 //@desc Get Post Comment by commnet Id
-//@route GET/api/post/comment/:postId/:commentId
+//@route GET/api/post/comment/:commentId
 //@access Public
 
 export const getPostComment = async(req, res) =>{
@@ -266,12 +279,30 @@ export const getPostComment = async(req, res) =>{
         if(!commentId || commentId===""){
             throw new Error("Invalid reply id");
         }
-        const commentObject = await ReplyModel.findById(commentId);
+        const id = new objectId(commentId)
+        const commentObject = await ReplyModel.findById(id);
         if(!commentObject){
             throw new Error("Invalid reply id");
         }
-        return res.status(200).send(commentObject);
+        const userObject = await UserModel.findById(commentObject.user).select('username firstName lastName profilePicture -_id');
+        const resObject = {...commentObject.toObject(), ...userObject.toObject()}
+        return res.status(200).send(resObject);
     } catch (error) {
         return res.status(404).send({error: error.message});
     }
+}
+
+//@desc Get Post Comment by commnet Id
+//@route GET/api/post/by-id/:postId/
+//@access Public
+
+export const getPostById = async (req, res) => {
+    try {
+        const postId = new objectId(req.params.postId);
+        const currentPost = await PostModel.findById(postId);
+        res.status(200).send({post: currentPost})
+    } catch (error) {
+        res.status(500).send(error)
+    }
+    return;
 }

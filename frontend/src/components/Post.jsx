@@ -1,4 +1,4 @@
-import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Avatar, Box, Button, Flex, Image, Menu, MenuButton, MenuItem, MenuList, Text, useDisclosure } from "@chakra-ui/react"
+import { AlertDialog, AlertDialogBody, AlertDialogContent, AlertDialogFooter, AlertDialogHeader, AlertDialogOverlay, Avatar, Box, Button, Divider, Flex, Image, Menu, MenuButton, MenuItem, MenuList, Text, useDisclosure } from "@chakra-ui/react"
 import { BsThreeDots } from "react-icons/bs"
 import { CgClose } from "react-icons/cg"
 import { Link, useNavigate } from "react-router-dom"
@@ -9,8 +9,9 @@ import { useGetUserByIdQuery } from '../slices/userApiSlice.js'
 import useCustomToast from "../hooks/useCustomToast";
 import { useSelector } from "react-redux"
 
-const Post = ({post, isShare, author_username, author_name}) => {
+const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
 
+    isPostPage = isPostPage? true : false;
     const userId=post.user;
     const postId=post._id;
     const images=post.images || [];
@@ -99,7 +100,10 @@ const Post = ({post, isShare, author_username, author_name}) => {
 
   return (
     <>
-        {isShare && <Link to={`/user/${author_username}`} >
+        {isShare && 
+        <Link to={`/user/${author_username}`} 
+            style={isPostPage? {pointerEvents: 'none'}: null}
+        >
             <Flex pt={5} flexDirection={'row'} ml={{base:'5',md:'10'}} alignItems={'center'} color={'#62676b'}>
                 {repostSvg()}
                 <Text className="text-underline" width={'fit-content'} fontWeight={'semibold'} fontSize={{base:'xs', md:'sm'}} >
@@ -107,7 +111,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
                 </Text>
             </Flex>
         </Link>}
-        <Link to={"/user/botjosh/post/1"}>
+        <Link to={`/user/botjosh/post/${postId}`}>
             <Flex flexDirection={'column'} gap={0} >
                 <Flex gap={4} mb={0} >
                     <Flex flexDirection={"column"} alignItems={"center"}>
@@ -126,7 +130,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
                                 zIndex={-1}
                             />
                         </div>
-                        {isReplied && <Box w="1px" h={"full"} bg="gray.light" my={1}></Box>}
+                        {!isPostPage && isReplied && <Box w="1px" h={"full"} bg="gray.light" my={1}></Box>}
                         {/* <Box position={"relative"} w={"full"}>
                             <Avatar 
                                 size="xs"
@@ -216,8 +220,9 @@ const Post = ({post, isShare, author_username, author_name}) => {
                             overflow={"hidden"}
                             border={"1px solid"}
                             borderColor={"gray.light"}
+                            w={'fit-content'}
                             >
-                                <Image src={images[0]} w={"full"}  
+                                <Image src={images[0]} maxW={'500px'}  
                                     onClick={(e)=>{toggleFullScreen(); e.preventDefault();}}
                                     cursor={"pointer"}/>
                         </Box>}
@@ -256,7 +261,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
                         <Actions post={post} authorName={user?.firstName}/>
                     </Flex>
                 </Flex>
-                <Flex w={'full'} mb={4}>
+                {!isPostPage && <Flex w={'full'} mb={4}>
                     {isReplied && replyObject && 
                         <>
                             <Flex gap={3}>
@@ -277,7 +282,7 @@ const Post = ({post, isShare, author_username, author_name}) => {
                             </Flex>
                         </>
                     }
-                </Flex>
+                </Flex>}
             </Flex>
         </Link>
     </>

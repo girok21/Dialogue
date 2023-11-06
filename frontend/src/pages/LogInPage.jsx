@@ -113,7 +113,7 @@ const LogInPage = () => {
           fontSize={'sm'}
           m={2}
           colorScheme={'telegram'}
-          onClick={(e)=>{e.preventDefault(); navigate('/signup')}}
+          onClick={(e)=>{e.preventDefault(); navigate('/auth/signup')}}
         >
           Create account
         </Button>

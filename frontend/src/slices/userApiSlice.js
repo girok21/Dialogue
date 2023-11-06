@@ -49,7 +49,7 @@ export const userApiSlice = apiSlice.injectEndpoints({
         }),
         getUserRelationship: builder.query({
             query: (id) => ({
-                url: `${USER_URL}/${id}/relation`,
+                url: `${USER_URL}/relation/${id}`,
             }),
             keepUnusedDataFor: 5
         }),

@@ -35,7 +35,6 @@ const SignUpPage = () => {
 
   const submitHandler = async(e)=>{
     e.preventDefault();
-    console.log('here')
     if(!email || !password || !passwordConfirmation || !firstName || !lastName || !username){
       toast({
         title: "All fields are required",
@@ -69,7 +68,7 @@ const SignUpPage = () => {
           username,
           password
         });
-        dispatch(setCredentials({...res}));
+        dispatch(setCredentials({...res.data}));
         if(res.error){
           throw new Error(res.error)
         }
@@ -248,7 +247,7 @@ const SignUpPage = () => {
             w={350}
             fontSize={'sm'}
             colorScheme={'telegram'}
-            onClick={()=>{navigate('/login')}}
+            onClick={()=>{navigate('/auth/login')}}
             >
             Log in
           </Button>

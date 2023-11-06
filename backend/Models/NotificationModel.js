@@ -23,7 +23,7 @@ const notificationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Reply'
     }
-});
+},{timestamps: true});
 
 const NotificationModel = mongoose.model('Notification', notificationSchema);
 

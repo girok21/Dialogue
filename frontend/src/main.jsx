@@ -28,6 +28,10 @@ const colors = {
   gray: {
     light: '#616161',
     dark: '#1e1e1e'
+  },
+  navBarIcon: {
+    dark: '#262626',
+    light: '#e3e3e3'
   }
 }
 
