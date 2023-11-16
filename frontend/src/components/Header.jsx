@@ -4,7 +4,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { logout } from "../slices/authSlice.js";
 import { useDispatch } from "react-redux";
 
-const Header = () => {
+const Header = ({isTabView}) => {
 
   const{ colorMode, toggleColorMode } = useColorMode();
   const outlineColor = colorMode === 'light'? '#b8b8b8' : '#4d4d4d';
@@ -19,18 +19,21 @@ const Header = () => {
       display={'flex'}
       alignItems={'center'}
       justifyContent={isAuthPath? "center" : "space-between"} 
-      mb={10}
       mt={isAuthPath? 8: 2}
       w={'inherit'} 
       position={'relative'}
+      h={isTabView? '65px': 'auto'}
     >
         <Image 
             cursor={'pointer'}
             onClick={()=>{navigate('/home')}}
-            src={colorMode === 'dark' ? (isAuthPath? '/light-logo-large.svg' : '/light-logo-small.svg') : (isAuthPath? '/dark-logo-large.svg' : '/dark-logo-small.svg')}           
+            src={isTabView? (colorMode === 'dark' ? "/light-logo-large.svg" : "/dark-logo-large.svg") 
+                  : (colorMode === 'dark' ? (isAuthPath? '/light-logo-large.svg' : '/light-logo-small.svg') 
+                    : (isAuthPath? '/dark-logo-large.svg' : '/dark-logo-small.svg'))}
+            h={{base: '30px', md:'30px'}}      
         />
         {!isAuthPath && <>
-          <NavBar />
+          {!isTabView && <NavBar />}
           <Menu >
             <MenuButton className="more_icon">
               <MoreSvg outlineColor={outlineColor} />

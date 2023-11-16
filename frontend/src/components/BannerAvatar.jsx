@@ -1,11 +1,11 @@
 import { Avatar, Box, Button, Flex, IconButton, Image } from '@chakra-ui/react'
 
-const BannerAvatar = ({bannerLink, avatarLink, avatarB64String,  isEdit}) => {
+const BannerAvatar = ({bannerLink, avatarLink, bannerB64String, avatarB64String,  isEdit}) => {
   return (
     <>
       <div style={{width:'100%', aspectRatio: '126/45'}}>
           <div style={{width: '100%', aspectRatio: '126/45', overflow:'hidden', background:'gray', borderRadius:'4px'}}>
-              <Image w={'full'} src={bannerLink} overflow={'hidden'}/>
+              <Image w={'full'} src={bannerB64String || bannerLink} overflow={'hidden'}/>
           </div>
           <div style={{position:'relative', top:'-60px', left:'10px', width:'fit-content'}}>
               <Avatar name='Bot Josh' 

@@ -23,22 +23,25 @@ const ProfileEditPage = () => {
     email: userInfo.email,
     bio: userInfo.bio,
   })
-  const { handleImageChange, imgUrl } = usePreviewImage();
-
+  const { handleImageChange: handleProfPicChange, imgUrl: profPicUrl } = usePreviewImage();
+  const { handleImageChange: handleCovPicChange, imgUrl: covPicUrl } = usePreviewImage();
+  const [ isProfPicChange, setIsProfPicChange ] = useState(true)
   const fileRef = useRef(null);
   const cancelRef = useRef(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const toast = useToast();
   const onChangeProfPicHandler = () =>{
+    setIsProfPicChange(true);
     fileRef.current.click();
   }
   const onChangeCovPicHandler = () =>{
+    setIsProfPicChange(false);
     fileRef.current.click();
   }
   const submitHandler = async (e) =>{
     e.preventDefault();
     try {
-        const res = await updateData({...userObject, profilePicture: imgUrl});
+        const res = await updateData({...userObject, profilePicture: profPicUrl});
         if(Object.keys(res.data).length === 0){
             throw new Error
         }
@@ -57,13 +60,8 @@ const ProfileEditPage = () => {
   return (
     <>
         <Flex 
-            // w={'50%'} 
             bg={'gray.700'} 
             borderRadius={'0.7rem'} 
-            // position={'absolute'} 
-            // mx={'auto'} 
-            // left={'0'} 
-            // right={'0'}
             overflow={'hidden'}
             flexDirection={'column'}
             gap={0}
@@ -87,14 +85,15 @@ const ProfileEditPage = () => {
                 <Flex flexDirection={'column'} style={{width: '100%', gap:'2px', color:'white'}}>
                     <BannerAvatar bannerLink={userInfo.coverPicture}
                         avatarLink = {userInfo.profilePicture || "/default-profile.jpg"}
-                        avatarB64String = {imgUrl}
+                        avatarB64String = {profPicUrl}
+                        bannerB64String = {covPicUrl}
                         isEdit={true}
                     />
                     <Flex flexDirection={'row-reverse'} gap={'1'} my={{base:'10px', md:'15px'}}>
-                        <Button size={{base:'xs', md:'sm'}} onClick={onChangeProfPicHandler}>Change Banner</Button>
+                        <Button size={{base:'xs', md:'sm'}} onClick={onChangeCovPicHandler}>Change Banner</Button>
                         {/* <Input type='file' hidden/> */}
-                        <Button size={{base:'xs', md:'sm'}} onClick={onChangeCovPicHandler}>Change Avatar</Button>
-                        <Input type='file' hidden ref={fileRef} onChange={handleImageChange}/>
+                        <Button size={{base:'xs', md:'sm'}} onClick={onChangeProfPicHandler}>Change Avatar</Button>
+                        <Input type='file' hidden ref={fileRef} onChange={isProfPicChange? handleProfPicChange : handleCovPicChange}/>
                     </Flex>
                     <Flex flexDirection={'column'} pl={{base:0, sm:10, lg:20}} gap={2} mt={{base:0, md:5}} fontSize={{base:'sm', md:'lg'}}>
                         <Flex flexDirection={'row'} gap={2}>

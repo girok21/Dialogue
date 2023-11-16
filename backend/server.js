@@ -31,9 +31,19 @@ app.use(cookieParser());
 
 //Routes
 
-app.get('/', (req, res) => {
-    res.send('API is running...')
-})
+if( process.env.NODE_ENV === 'production'){
+    //set static folder
+    app.use(express.static(path.join(__dirname, '/fontend/build')));
+
+    //any route that is not api will be redirected to index.html
+    app.get('*', (req, res) => {
+        res.sendFile(path.resolve(__dirname, 'fontend', 'build', 'index.html'));
+    })
+}else{
+    app.get('/', (req, res) => {
+        res.send('API is running...')
+    })
+}
 
 app.use('/api/auth', AuthRoute);
 app.use('/api/user', UserRoute);

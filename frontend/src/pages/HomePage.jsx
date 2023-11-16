@@ -24,7 +24,6 @@ const HomePage = () => {
     const imageRef = useRef(null);
     const { showToast } = useCustomToast();
 
-    console.log(error)
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
@@ -102,7 +101,7 @@ const HomePage = () => {
         >
             <Flex>
                 <div 
-                    onClick={(e)=>{e.preventDefault(); console.log('here'); navigate(`/user/${userInfo?.username}`)}}
+                    onClick={(e)=>{e.preventDefault(); navigate(`/user/${userInfo?.username}`)}}
                     style={{cursor: "pointer"}}
                 >
                     <Avatar 
@@ -163,7 +162,7 @@ const HomePage = () => {
                     >
                         <Flex gap={4} cursor={"pointer"} > 
                             <BiSolidImageAdd size={20} onClick = {()=> imageRef.current.click()}/>
-                            <PiGifFill size={20}/>
+                            {/* <PiGifFill size={20}/> */}
                             {/* <RiEmojiStickerFill size={20} onClick={()=>{
                                 setIsEmojiPickerActive(!isEmojiPickerActive)}}/>
                             { isEmojiPickerActive && 
@@ -191,8 +190,8 @@ const HomePage = () => {
                             </>
                             } */}
                             <EmojiPickerIcon  handleEmojiSelect={handleEmojiSelect}/>
-                            <BiPoll size={20} />
-                            <MdScheduleSend size={20}/>
+                            {/* <BiPoll size={20} />
+                            <MdScheduleSend size={20}/> */}
                         </Flex>                        
                         <Button
                             type="submit"

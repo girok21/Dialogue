@@ -199,6 +199,7 @@ export const likePost = async (req, res) => {
             const newNotification = new NotificationModel({
                 user: currentPost.user,
                 type: 'post_liked',
+                post: currentPost._id,
                 relatedUser: currentUser._id
             });
             const savedNotification = await newNotification.save();

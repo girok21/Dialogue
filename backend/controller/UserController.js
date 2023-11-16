@@ -379,6 +379,7 @@ export const getUserNotifications = async (req, res) => {
                     type: 1,
                     user: 1,
                     createdAt: 1,
+                    post: 1,
                     "relatedUser.profilePicture": 1,
                     "relatedUser.username": 1,
                     "relatedUser.firstName": 1,
@@ -390,5 +391,27 @@ export const getUserNotifications = async (req, res) => {
     } catch (error) {
         console.log('here')
         res.status(500).json({ error });
+    }
+}
+
+export const getUsersBySearch = async(req, res)=>{
+    const {searchString} = req.params;//expects a string in shown format <search_string><special seperator><is_blank(true/false)>
+    const specialSeparator = '<>'; // Define the special seperator same as client side
+    const defaultUsernames = ['onepunchman', 'girok'];//users which will be shown by default
+    try {
+        const [actualSearchString, isBlankSearchStr] = searchString.split(specialSeparator);
+        const isBlankSearch = isBlankSearchStr === 'true';
+        if(isBlankSearch){
+            const users = await UserModel.find({'username': {$in: defaultUsernames}}).select("firstName lastName username profilePicture followers");
+            return res.status(200).json(users);
+        }
+        const regex = new RegExp(actualSearchString, 'i')
+        const users = await UserModel.find({$or:[{'firstName': {$regex: regex}}, 
+                                                    {'lastName': {$regex: regex}}, 
+                                                    {'username': {$regex: regex}}]}).select("firstName lastName username profilePicture followers");
+        return res.status(200).json(users)
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({message: error.message});
     }
 }

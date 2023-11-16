@@ -222,7 +222,7 @@ const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
                             borderColor={"gray.light"}
                             w={'fit-content'}
                             >
-                                <Image src={images[0]} maxW={'500px'}  
+                                <Image src={images[0]} maxW={'100%'}  
                                     onClick={(e)=>{toggleFullScreen(); e.preventDefault();}}
                                     cursor={"pointer"}/>
                         </Box>}
@@ -236,6 +236,7 @@ const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
                                                             justifyContent={"center"}
                                                             alignItems={"center"}
                                                             cursor={"default"}
+                                                            zIndex={'12'}
                                                             onClick={(e)=>{setImgFullScreen(toggleFullScreen);e.preventDefault();}}>
                                             <Box className="icon-container"
                                                 display={"flex"}
@@ -250,8 +251,9 @@ const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
                                                 <CgClose />
                                             </Box>
                                         <Image src={images[0]}                                   
-                                            maxW={"100vw"}
-                                            maxH={"100vh"}
+                                            // maxW={"100vw"}
+                                            // maxH={"100vh"}
+                                            w={{base: '95%', md: '60%'}}
                                             h={"auto"}
                                             cursor={"default"}
                                             onClick={e => {e.preventDefault();e.stopPropagation()}}

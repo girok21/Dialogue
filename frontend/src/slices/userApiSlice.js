@@ -61,6 +61,27 @@ export const userApiSlice = apiSlice.injectEndpoints({
             }),
             keepUnusedDataFor: 5,
         }),
+        getNotifications: builder.query({
+            query: ()=>({
+                url: `${USER_URL}/notifications`,
+            }),
+            keepUnusedDataFor: 5,
+        }),
+        getUsersBySearch: builder.query({
+            // query: (searchString) => ({
+            //     url:`${USER_URL}/search/${searchString}`,
+            // }),
+            query: (searchString) => {
+                const specialSeparator = '<>'; // Choose your special separator
+                const isBlankSearch = searchString === '';
+            
+                // Construct the URL based on the value of searchString and isBlankSearch flag
+                const url = `${USER_URL}/search/${searchString}${specialSeparator}${isBlankSearch}`;
+            
+                return { url };
+              },
+            keepUnusedDataFor: 5,
+        })
     }),
 })
 
@@ -72,5 +93,7 @@ export const {
     useGetUserProfileQuery,
     useGetUserRelationshipQuery,
     usePutUserFollowUnfollowMutation,
-    useGetUserByIdQuery
+    useGetUserByIdQuery,
+    useGetNotificationsQuery,
+    useGetUsersBySearchQuery
 } = userApiSlice;
