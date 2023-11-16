@@ -50,7 +50,7 @@ const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
         if(post && userInfo){
         {
             post.comments.forEach(({_id, userId}) => {
-                if(userInfo._id === userId)
+                if(userInfo?._id === userId)
                 {
                     setIsReplied(true);
                     setCommentId(_id);
@@ -107,7 +107,7 @@ const Post = ({post, isShare, author_username, author_name, isPostPage}) => {
             <Flex pt={5} flexDirection={'row'} ml={{base:'5',md:'10'}} alignItems={'center'} color={'#62676b'}>
                 {repostSvg()}
                 <Text className="text-underline" width={'fit-content'} fontWeight={'semibold'} fontSize={{base:'xs', md:'sm'}} >
-                    {userInfo.username!==author_username?author_name : 'You'} reposted
+                    {userInfo?.username!==author_username?author_name : 'You'} reposted
                 </Text>
             </Flex>
         </Link>}

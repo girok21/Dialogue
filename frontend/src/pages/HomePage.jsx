@@ -1,6 +1,6 @@
 import { Avatar, Box, Button, CloseButton, Divider, Flex, Image, Input, Popover, PopoverBody, PopoverContent, PopoverTrigger, Select, Text, Textarea, useColorMode, useToast } from "@chakra-ui/react"
 import UserFeed from "../components/UserFeed"
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useCreatePostMutation } from "../slices/postApiSlice";
 import { useGetUserFeedQuery } from "../slices/userApiSlice";
 import { useNavigate } from "react-router-dom";

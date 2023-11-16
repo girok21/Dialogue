@@ -1,4 +1,5 @@
 import express from 'express';
+import path from 'path';
 import users from './Data/users.js'
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
@@ -19,7 +20,7 @@ cloudinary.config({
 });
 
 connectDB();
-
+const __dirname = path.resolve(); // Set __dirname to current working directory
 const app = express();
 
 //Body parser middleware
@@ -31,22 +32,24 @@ app.use(cookieParser());
 
 //Routes
 
+app.use('/api/auth', AuthRoute);
+app.use('/api/user', UserRoute);
+app.use('/api/post', PostRoute);
+
 if( process.env.NODE_ENV === 'production'){
     //set static folder
-    app.use(express.static(path.join(__dirname, '/fontend/build')));
+    app.use(express.static(path.join(__dirname, '/frontend/dist')));
 
     //any route that is not api will be redirected to index.html
     app.get('*', (req, res) => {
-        res.sendFile(path.resolve(__dirname, 'fontend', 'build', 'index.html'));
+        const indexPath = path.resolve(__dirname, 'frontend', 'dist', 'index.html');
+        console.log(`Serving ${indexPath} for route: ${req.url}`);
+        res.sendFile(indexPath);
     })
 }else{
     app.get('/', (req, res) => {
         res.send('API is running...')
     })
 }
-
-app.use('/api/auth', AuthRoute);
-app.use('/api/user', UserRoute);
-app.use('/api/post', PostRoute);
 
 app.listen(port, ()=> console.log(`Server running at ${port}`))

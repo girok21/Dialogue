@@ -18,6 +18,7 @@
     "@giphy/react-components": "^9.1.0",
     "@reduxjs/toolkit": "^1.9.7",
     "axios": "^1.5.1",
+    "dialogue": "file:..",
     "emoji-mart": "^5.5.2",
     "framer-motion": "^10.16.4",
     "http-proxy-middleware": "^2.0.6",

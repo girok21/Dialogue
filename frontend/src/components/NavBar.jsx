@@ -14,7 +14,7 @@ const NavBar = () => {
                                                     '/home': false,
                                                     '/activity': false,
                                                     '/search': false,
-                                                    [`/user/${userInfo.username}`]: false,
+                                                    [`/user/${userInfo?.username}`]: false,
                                                   });
 
   useEffect(()=>{
@@ -23,7 +23,7 @@ const NavBar = () => {
         '/home': false,
         '/activity': false,
         '/search': false,
-        [`/user/${userInfo.username}`]: false,
+        [`/user/${userInfo?.username}`]: false,
       };
       tempObject[pathname] = true;
       setPathObject(tempObject);
@@ -32,7 +32,7 @@ const NavBar = () => {
         '/home': false,
         '/activity': false,
         '/search': false,
-        [`/user/${userInfo.username}`]: false,
+        [`/user/${userInfo?.username}`]: false,
       });
     }
   }, [pathname]);
@@ -95,9 +95,9 @@ const NavBar = () => {
               _hover={{
                 background: `${iconColor}`
               }}
-              onClick={()=>{ navigate(`/user/${userInfo.username}`)}}
+              onClick={()=>{ navigate(`/user/${userInfo?.username}`)}}
             >
-              <ProfileSvg outlineColor={outlineColor} fillColor={fillColor} isFilled={pathObject[`/user/${userInfo.username}`]}/>
+              <ProfileSvg outlineColor={outlineColor} fillColor={fillColor} isFilled={pathObject[`/user/${userInfo?.username}`]}/>
             </Box>
         </Flex>
     </>

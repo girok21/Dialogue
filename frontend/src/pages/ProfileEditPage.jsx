@@ -17,11 +17,11 @@ const ProfileEditPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [userObject, setUserObject] = useState({
-    username: userInfo.username,
-    firstName: userInfo.firstName,
-    lastName: userInfo.lastName,
-    email: userInfo.email,
-    bio: userInfo.bio,
+    username: userInfo?.username,
+    firstName: userInfo?.firstName,
+    lastName: userInfo?.lastName,
+    email: userInfo?.email,
+    bio: userInfo?.bio,
   })
   const { handleImageChange: handleProfPicChange, imgUrl: profPicUrl } = usePreviewImage();
   const { handleImageChange: handleCovPicChange, imgUrl: covPicUrl } = usePreviewImage();
@@ -83,8 +83,8 @@ const ProfileEditPage = () => {
                 px={2}
             >
                 <Flex flexDirection={'column'} style={{width: '100%', gap:'2px', color:'white'}}>
-                    <BannerAvatar bannerLink={userInfo.coverPicture}
-                        avatarLink = {userInfo.profilePicture || "/default-profile.jpg"}
+                    <BannerAvatar bannerLink={userInfo?.coverPicture}
+                        avatarLink = {userInfo?.profilePicture || "/default-profile.jpg"}
                         avatarB64String = {profPicUrl}
                         bannerB64String = {covPicUrl}
                         isEdit={true}

@@ -28,11 +28,11 @@ const Actions = ({post, authorName}) => {
 
   useEffect(()=>{
     if(userInfo && post){
-      const postLiked = post.likes.indexOf(userInfo._id) === -1? false : true;
+      const postLiked = post.likes.indexOf(userInfo?._id) === -1? false : true;
       setLikesCount(postLiked? post.likes.length - 1 : post.likes.length);//we will negate 1 like, or else it will count current user's like twice
       setLiked(postLiked);
       post.shares;
-      const postShared = post.shares.indexOf(userInfo._id) === -1? false : true;
+      const postShared = post.shares.indexOf(userInfo?._id) === -1? false : true;
       setIsShared(postShared);
     }
   }, [userInfo, post])

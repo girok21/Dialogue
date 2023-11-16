@@ -42,7 +42,7 @@ const SearchPage = () => {
           <React.Fragment key={user._id}>
             <Flex key={user._id} gap={2} 
               cursor={'pointer'}
-              onClick={(e)=>{navigate(`/user/${user.username}`); console.log(user.username)}}
+              onClick={(e)=>{navigate(`/user/${user.username}`)}}
               h={'fit-content'}
               w={'full'}
             >
