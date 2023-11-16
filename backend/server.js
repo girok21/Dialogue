@@ -1,6 +1,5 @@
 import express from 'express';
 import path from 'path';
-import users from './Data/users.js'
 import dotenv from 'dotenv';
 import connectDB from './config/db.js';
 import AuthRoute from './Routes/AuthRoute.js';
